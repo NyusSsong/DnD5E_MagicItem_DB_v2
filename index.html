@@ -1,60 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Item Database</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
+  <header>
+    <h1>Item Database</h1>
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search by name..." />
+      <select id="filter-type">
+        <option value="">All Types</option>
+      </select>
+      <select id="filter-rarity">
+        <option value="">All Rarities</option>
+      </select>
+      <select id="filter-attunement">
+        <option value="">All Attunements</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <button id="sort-alpha">Sort A–Z</button>
+      <button id="login-btn">Login</button>
+      <button id="add-item-btn" class="hidden">Add Item</button>
+      <button id="logout-btn" class="hidden">Logout</button>
+    </div>
+  </header>
 
-<header>
-  <h1>Item Database</h1>
-  <div class="controls">
-    <input type="text" id="search" placeholder="Search by name..." />
-    <select id="filter-type">
-      <option value="">All Types</option>
-    </select>
-    <select id="filter-rarity">
-      <option value="">All Rarities</option>
-    </select>
-    <select id="filter-attunement">
-      <option value="">All Attunements</option>
-      <option value="Yes">Yes</option>
-      <option value="No">No</option>
-    </select>
-    <button id="sort-alpha">Sort A–Z</button>
+  <main>
+    <table id="results">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Rarity</th>
+          <th>Attunement</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <!-- Item Modal -->
+  <div id="modal">
+    <div id="modal-content">
+      <span id="modal-close">&times;</span>
+      <h2 id="modal-title"></h2>
+      <div class="meta" id="modal-meta"></div>
+      <p id="modal-description"></p>
+    </div>
   </div>
-</header>
 
-<main>
-  <table id="results">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Rarity</th>
-        <th>Attunement</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Data rows go here -->
-    </tbody>
-  </table>
-</main>
-
-<!-- Modal -->
-<div id="modal">
-  <div id="modal-content">
-    <span id="modal-close">&times;</span>
-    <h2 id="modal-title"></h2>
-    <div class="meta" id="modal-meta"></div>
-    <p id="modal-description"></p>
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal hidden">
+    <div class="modal-box">
+      <h2>Admin Login</h2>
+      <input type="email" id="login-email" placeholder="Email" />
+      <input type="password" id="login-password" placeholder="Password" />
+      <button id="login-submit">Login</button>
+      <button id="login-cancel">Cancel</button>
+    </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
+  <!-- Add Item Modal -->
+  <div id="add-item-modal" class="modal hidden">
+    <div class="modal-box">
+      <h2>Add New Item</h2>
+      <input id="item-name" type="text" placeholder="Name" required />
+      <input id="item-type" type="text" placeholder="Type" required />
+      
+      <select id="item-rarity" required>
+        <option value="">Select Rarity</option>
+        <option value="Common">Common</option>
+        <option value="Uncommon">Uncommon</option>
+        <option value="Rare">Rare</option>
+        <option value="Very Rare">Very Rare</option>
+        <option value="Legendary">Legendary</option>
+        <option value="Unique">Unique</option>
+        <option value="Artifact">Artifact</option>
+      </select>
+      
+      <select id="item-attunement" required>
+        <option value="">Requires Attunement?</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      
+      <textarea id="item-description" placeholder="Description (supports * bullet points)"></textarea>
+      <button id="item-submit">Add Item</button>
+      <button id="item-cancel">Cancel</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
 </body>
 </html>
