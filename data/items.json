@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Common Sword",
+    "type": "Weapon",
+    "rarity": "Common",
+    "attunement": "No",
+    "description": "A simple sword, easy to wield and widely used by adventurers."
+  },
+  {
+    "id": 2,
+    "name": "Uncommon Shield",
+    "type": "Armor",
+    "rarity": "Uncommon",
+    "attunement": "No",
+    "description": "A sturdy shield with minor enchantments that improve your defense slightly."
+  },
+  {
+    "id": 3,
+    "name": "Rare Amulet of Health",
+    "type": "Wondrous Item",
+    "rarity": "Rare",
+    "attunement": "Yes",
+    "description": "This amulet increases the wearer's vitality, granting enhanced stamina and resilience in battle."
+  },
+  {
+    "id": 4,
+    "name": "Scroll of Eldritch Bargain",
+    "type": "Wondrous Item",
+    "rarity": "Very Rare",
+    "attunement": "Yes",
+    "description": "This long scroll bears strange runes and seals of eldritch powers. When you use an action to present this scroll to an aberration whose Challenge Rating is equal to or less than your level, the binding powers of the scroll compel it to listen to you..."
+  },
+  {
+    "id": 5,
+    "name": "Legendary Sword of Flames",
+    "type": "Weapon",
+    "rarity": "Legendary",
+    "attunement": "Yes",
+    "description": "Forged in dragonfire, this sword can ignite its blade at will, dealing tremendous fire damage to foes."
+  },
+  {
+    "id": 6,
+    "name": "Artifact Crown of Eternity",
+    "type": "Wondrous Item",
+    "rarity": "Artifact",
+    "attunement": "Yes",
+    "description": "A crown that grants its wearer immortality and vast arcane powers, though it binds the wearer to the fate of the realm itself."
+  }
+]

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Database</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Item Database</h1>
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search by name..." />
+    <select id="filter-type">
+      <option value="">All Types</option>
+    </select>
+    <select id="filter-rarity">
+      <option value="">All Rarities</option>
+    </select>
+    <select id="filter-attunement">
+      <option value="">All Attunements</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+    <button id="sort-alpha">Sort A–Z</button>
+  </div>
+</header>
+
+<main>
+  <table id="results">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Rarity</th>
+        <th>Attunement</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Data rows go here -->
+    </tbody>
+  </table>
+</main>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modal-content">
+    <span id="modal-close">&times;</span>
+    <h2 id="modal-title"></h2>
+    <div class="meta" id="modal-meta"></div>
+    <p id="modal-description"></p>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
