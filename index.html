@@ -15,16 +15,9 @@
     <input type="text" id="search" placeholder="Search by name..." />
     <select id="filter-type">
       <option value="">All Types</option>
-      <!-- Types will be populated dynamically -->
     </select>
     <select id="filter-rarity">
       <option value="">All Rarities</option>
-      <option value="Common">Common</option>
-      <option value="Uncommon">Uncommon</option>
-      <option value="Rare">Rare</option>
-      <option value="Very Rare">Very Rare</option>
-      <option value="Legendary">Legendary</option>
-      <option value="Unique">Unique</option>
     </select>
     <select id="filter-attunement">
       <option value="">All Attunements</option>
@@ -32,7 +25,9 @@
       <option value="No">No</option>
     </select>
     <button id="sort-alpha">Sort A–Z</button>
-    <button id="open-add-card">Add Item</button>
+    <button id="login-btn">Login</button>
+    <button id="logout-btn" style="display:none;">Logout</button>
+    <button id="open-add-card" style="display:none;">Add Item</button>
   </div>
 </header>
 
@@ -52,7 +47,7 @@
   </table>
 </main>
 
-<!-- Modal for item details -->
+<!-- Item Details Modal -->
 <div id="modal">
   <div id="modal-content">
     <span id="modal-close">&times;</span>
@@ -87,6 +82,20 @@
       <button class="submit-btn" id="submit-item">Add Item</button>
       <button class="cancel-btn" id="cancel-item">Cancel</button>
     </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="login-modal">
+  <div class="card-content">
+    <h2>Login</h2>
+    <input type="email" id="login-email" placeholder="Email" required />
+    <input type="password" id="login-password" placeholder="Password" required />
+    <div class="card-buttons">
+      <button id="login-submit">Login</button>
+      <button id="login-cancel">Cancel</button>
+    </div>
+    <p id="login-error" style="color:#ff6666;"></p>
   </div>
 </div>
 
