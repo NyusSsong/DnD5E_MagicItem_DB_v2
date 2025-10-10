@@ -14,7 +14,6 @@ const resultsBody = document.querySelector("#results tbody");
 const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modal-close");
 
-// Add Item Card Elements
 const addItemBtn = document.getElementById("open-add-card");
 const addItemCard = document.getElementById("add-item-card");
 const cancelNewItemBtn = document.getElementById("cancel-item");
@@ -34,7 +33,7 @@ async function loadItems() {
     items = Array.isArray(data) ? data : [];
     items = items.map(i => ({ ...i, attunement: (i.attunement || "").toString() }));
 
-    populateFilters();
+    populateTypeFilter();
     applyFilters();
   } catch (err) {
     console.error("Fetch failed:", err);
@@ -42,26 +41,17 @@ async function loadItems() {
   }
 }
 
-// ===== Populate Filters =====
-function populateFilters() {
+// ===== Populate Type Filter Dynamically =====
+function populateTypeFilter() {
+  // Remove previous options except "All Types"
   filterType.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
-  filterRarity.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
 
   const types = [...new Set(items.map(i => i.type || "").filter(Boolean))].sort();
-  const rarities = [...new Set(items.map(i => i.rarity || "").filter(Boolean))].sort();
-
   types.forEach(t => {
     const opt = document.createElement("option");
     opt.value = t;
     opt.textContent = t;
     filterType.appendChild(opt);
-  });
-
-  rarities.forEach(r => {
-    const opt = document.createElement("option");
-    opt.value = r;
-    opt.textContent = r;
-    filterRarity.appendChild(opt);
   });
 }
 
@@ -144,6 +134,7 @@ searchInput.addEventListener("input", applyFilters);
 filterType.addEventListener("change", applyFilters);
 filterRarity.addEventListener("change", applyFilters);
 filterAttunement.addEventListener("change", applyFilters);
+
 sortButton.addEventListener("click", () => {
   sortAscending = !sortAscending;
   sortButton.textContent = sortAscending ? "Sort A–Z" : "Sort Z–A";
@@ -151,29 +142,21 @@ sortButton.addEventListener("click", () => {
 });
 
 // ===== Add Item Card Logic =====
-addItemBtn.addEventListener("click", () => {
-  addItemCard.style.display = "flex";
-});
-
-cancelNewItemBtn.addEventListener("click", () => {
-  addItemCard.style.display = "none";
-});
-
-addItemCard.addEventListener("click", e => {
-  if (e.target === addItemCard) addItemCard.style.display = "none";
-});
+addItemBtn.addEventListener("click", () => addItemCard.style.display = "flex");
+cancelNewItemBtn.addEventListener("click", () => addItemCard.style.display = "none");
+addItemCard.addEventListener("click", e => { if (e.target === addItemCard) addItemCard.style.display = "none"; });
 
 submitNewItemBtn.addEventListener("click", async () => {
   const newItem = {
-    name: document.getElementById("add-name").value.trim(),
-    type: document.getElementById("add-type").value.trim(),
+    name: document.getElementById("add-name").value,
+    type: document.getElementById("add-type").value,
     rarity: document.getElementById("add-rarity").value,
     attunement: document.getElementById("add-attunement").value,
-    description: document.getElementById("add-description").value.trim()
+    description: document.getElementById("add-description").value
   };
 
-  if (!newItem.name || !newItem.type || !newItem.rarity) {
-    return alert("Name, Type, and Rarity are required.");
+  if (!newItem.name || !newItem.type || !newItem.rarity || !newItem.attunement) {
+    return alert("Name, Type, Rarity, and Attunement are required.");
   }
 
   const { error } = await supabaseClient.from("items").insert([newItem]);
