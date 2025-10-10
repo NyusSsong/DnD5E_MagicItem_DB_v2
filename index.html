@@ -25,7 +25,7 @@
       <option value="No">No</option>
     </select>
     <button id="sort-alpha">Sort A–Z</button>
-    <button id="add-item-btn">Add New Item</button>
+    <button id="open-add-card">Add Item</button>
   </div>
 </header>
 
@@ -45,7 +45,7 @@
   </table>
 </main>
 
-<!-- Modal for item description -->
+<!-- Modal for item details -->
 <div id="modal">
   <div id="modal-content">
     <span id="modal-close">&times;</span>
@@ -56,30 +56,29 @@
 </div>
 
 <!-- Add Item Card -->
-<div id="add-item-card" class="modal-form">
-  <div class="modal-form-box">
+<div id="add-item-card">
+  <div class="card-content">
     <h2>Add New Item</h2>
-    <input type="text" id="new-name" placeholder="Name">
-    <input type="text" id="new-type" placeholder="Type">
-    <select id="new-rarity">
+    <input type="text" id="add-name" placeholder="Name" required />
+    <input type="text" id="add-type" placeholder="Type" required />
+    <select id="add-rarity" required>
       <option value="">Select Rarity</option>
       <option value="Common">Common</option>
       <option value="Uncommon">Uncommon</option>
       <option value="Rare">Rare</option>
       <option value="Very Rare">Very Rare</option>
       <option value="Legendary">Legendary</option>
-      <option value="Artifact">Artifact</option>
       <option value="Unique">Unique</option>
     </select>
-    <select id="new-attunement">
+    <select id="add-attunement" required>
       <option value="">Requires Attunement?</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
     </select>
-    <textarea id="new-description" placeholder="Description (supports * bullets)"></textarea>
-    <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
-      <button id="submit-new-item">Add Item</button>
-      <button id="cancel-new-item">Cancel</button>
+    <textarea id="add-description" placeholder="Description (supports * for bullet points)"></textarea>
+    <div class="card-buttons">
+      <button class="submit-btn" id="submit-item">Add Item</button>
+      <button class="cancel-btn" id="cancel-item">Cancel</button>
     </div>
   </div>
 </div>
