@@ -15,10 +15,10 @@ const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modal-close");
 
 // Add Item Card Elements
-const addItemBtn = document.getElementById("add-item-btn");
+const addItemBtn = document.getElementById("open-add-card");
 const addItemCard = document.getElementById("add-item-card");
-const cancelNewItemBtn = document.getElementById("cancel-new-item");
-const submitNewItemBtn = document.getElementById("submit-new-item");
+const cancelNewItemBtn = document.getElementById("cancel-item");
+const submitNewItemBtn = document.getElementById("submit-item");
 
 // ===== Global State =====
 let items = [];
@@ -165,11 +165,11 @@ addItemCard.addEventListener("click", e => {
 
 submitNewItemBtn.addEventListener("click", async () => {
   const newItem = {
-    name: document.getElementById("new-name").value,
-    type: document.getElementById("new-type").value,
-    rarity: document.getElementById("new-rarity").value,
-    attunement: document.getElementById("new-attunement").value,
-    description: document.getElementById("new-description").value
+    name: document.getElementById("add-name").value.trim(),
+    type: document.getElementById("add-type").value.trim(),
+    rarity: document.getElementById("add-rarity").value,
+    attunement: document.getElementById("add-attunement").value,
+    description: document.getElementById("add-description").value.trim()
   };
 
   if (!newItem.name || !newItem.type || !newItem.rarity) {
@@ -183,11 +183,11 @@ submitNewItemBtn.addEventListener("click", async () => {
   }
 
   // Reset form
-  document.getElementById("new-name").value = "";
-  document.getElementById("new-type").value = "";
-  document.getElementById("new-rarity").value = "";
-  document.getElementById("new-attunement").value = "";
-  document.getElementById("new-description").value = "";
+  document.getElementById("add-name").value = "";
+  document.getElementById("add-type").value = "";
+  document.getElementById("add-rarity").value = "";
+  document.getElementById("add-attunement").value = "";
+  document.getElementById("add-description").value = "";
 
   addItemCard.style.display = "none";
   loadItems(); // Refresh table
