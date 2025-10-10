@@ -1,6 +1,6 @@
-let items = [];
-let filteredItems = [];
-
+const SUPABASE_URL = "https://mcsyppddpfdwszjujvdb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jc3lwcGRkcGZkd3N6anVqdmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwODEwMDQsImV4cCI6MjA3NTY1NzAwNH0.baTeknh36nwbn3PFV_CNGt-3aTD7QYo12mI1cxn6iZw";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const searchInput = document.getElementById("search");
 const filterType = document.getElementById("filter-type");
 const filterRarity = document.getElementById("filter-rarity");
@@ -8,21 +8,41 @@ const filterAttunement = document.getElementById("filter-attunement");
 const sortButton = document.getElementById("sort-alpha");
 const resultsBody = document.querySelector("#results tbody");
 
-let sortAscending = true;
-
-// Load items
+/* ---------- Load items from Supabase ---------- */
 async function loadItems() {
-  const res = await fetch("data/items.json");
-  items = await res.json();
-  populateFilters();
-  applyFilters();
+  try {
+    // Select all items. You can .order('name') here if you want server-side ordering.
+    const { data, error } = await supabaseClient
+      .from('items')
+      .select('*');
+
+    if (error) {
+      console.error("Supabase error:", error);
+      resultsBody.innerHTML = `<tr><td colspan="4">Error loading data.</td></tr>`;
+      return;
+    }
+
+    items = Array.isArray(data) ? data : [];
+    // Optional: normalize attunement (so "Yes"/"No" casing is consistent)
+    items = items.map(i => ({ ...i, attunement: (i.attunement || "").toString() }));
+
+    populateFilters();
+    applyFilters();
+  } catch (err) {
+    console.error("Fetch failed:", err);
+    resultsBody.innerHTML = `<tr><td colspan="4">Network error.</td></tr>`;
+  }
 }
 
-// Populate filters
+/* ---------- Populate filters (type & rarity) ---------- */
 function populateFilters() {
-  const types = [...new Set(items.map(item => item.type))];
-  const rarities = [...new Set(items.map(item => item.rarity))];
-  const attunements = [...new Set(items.map(item => item.attunement))];
+  // Clear existing (except the first default option)
+  filterType.querySelectorAll('option:not(:first-child)').forEach(n => n.remove());
+  filterRarity.querySelectorAll('option:not(:first-child)').forEach(n => n.remove());
+  // We keep attunement fixed in HTML (Yes/No)
+
+  const types = [...new Set(items.map(i => i.type || "").filter(Boolean))].sort();
+  const rarities = [...new Set(items.map(i => i.rarity || "").filter(Boolean))].sort();
 
   types.forEach(t => {
     const opt = document.createElement("option");
@@ -37,19 +57,12 @@ function populateFilters() {
     opt.textContent = r;
     filterRarity.appendChild(opt);
   });
-
-  attunements.forEach(a => {
-    const opt = document.createElement("option");
-    opt.value = a;
-    opt.textContent = a;
-    filterAttunement.appendChild(opt);
-  });
 }
 
-// Render items as rows
+/* ---------- Render table rows ---------- */
 function renderItems(data) {
   resultsBody.innerHTML = "";
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     resultsBody.innerHTML = "<tr><td colspan='4'>No items found.</td></tr>";
     return;
   }
@@ -57,31 +70,31 @@ function renderItems(data) {
   data.forEach(item => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${item.name}</td>
-      <td>${item.type}</td>
-      <td>${item.rarity}</td>
-      <td>${item.attunement}</td>
+      <td>${escapeHtml(item.name || "")}</td>
+      <td>${escapeHtml(item.type || "")}</td>
+      <td>${escapeHtml(item.rarity || "")}</td>
+      <td>${escapeHtml(item.attunement || "")}</td>
     `;
-
     tr.addEventListener("click", () => openModal(item));
     resultsBody.appendChild(tr);
   });
 }
 
-// Modal setup
+/* ---------- Modal functions ---------- */
 const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modal-close");
+
 modalClose.addEventListener("click", closeModal);
-modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
+modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
 function openModal(item) {
-  document.getElementById("modal-title").textContent = item.name;
+  document.getElementById("modal-title").textContent = item.name || "";
   document.getElementById("modal-meta").innerHTML = `
-    <span class="meta-item"><strong>Type:</strong> ${item.type}</span>
-    <span class="meta-item"><strong>Rarity:</strong> ${item.rarity}</span>
-    <span class="meta-item"><strong>Attunement:</strong> ${item.attunement}</span>
+    <span class="meta-item"><strong>Type:</strong> ${escapeHtml(item.type || "")}</span>
+    <span class="meta-item"><strong>Rarity:</strong> ${escapeHtml(item.rarity || "")}</span>
+    <span class="meta-item"><strong>Attunement:</strong> ${escapeHtml(item.attunement || "")}</span>
   `;
-  document.getElementById("modal-description").textContent = item.description;
+  document.getElementById("modal-description").textContent = item.description || "";
   modal.style.display = "flex";
 }
 
@@ -89,26 +102,36 @@ function closeModal() {
   modal.style.display = "none";
 }
 
-// Filter & sort
+/* ---------- Filters + sorting ---------- */
 function applyFilters() {
-  const search = searchInput.value.toLowerCase();
-  const typeVal = filterType.value;
-  const rarityVal = filterRarity.value;
-  const attuneVal = filterAttunement.value;
+  const search = (searchInput.value || "").toLowerCase().trim();
+  const typeVal = filterType.value || "";
+  const rarityVal = filterRarity.value || "";
+  const attuneVal = filterAttunement.value || "";
 
-  filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(search);
-    const matchesType = typeVal === "" || item.type === typeVal;
-    const matchesRarity = rarityVal === "" || item.rarity === rarityVal;
-    const matchesAttune = attuneVal === "" || item.attunement === attuneVal;
+  filteredItems = items.filter(i => {
+    const matchesSearch = (i.name || "").toLowerCase().includes(search);
+    const matchesType = typeVal === "" || (i.type || "") === typeVal;
+    const matchesRarity = rarityVal === "" || (i.rarity || "") === rarityVal;
+    const matchesAttune = attuneVal === "" || (i.attunement || "") === attuneVal;
     return matchesSearch && matchesType && matchesRarity && matchesAttune;
   });
 
-  filteredItems.sort((a,b) => sortAscending ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+  filteredItems.sort((a, b) => sortAscending ? (a.name || "").localeCompare(b.name || "") : (b.name || "").localeCompare(a.name || ""));
   renderItems(filteredItems);
 }
 
-// Event listeners
+/* ---------- Utilities ---------- */
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+/* ---------- Event listeners ---------- */
 searchInput.addEventListener("input", applyFilters);
 filterType.addEventListener("change", applyFilters);
 filterRarity.addEventListener("change", applyFilters);
@@ -119,4 +142,5 @@ sortButton.addEventListener("click", () => {
   applyFilters();
 });
 
+/* ---------- Start ---------- */
 loadItems();
