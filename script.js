@@ -1,6 +1,7 @@
 const SUPABASE_URL = "https://mcsyppddpfdwszjujvdb.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jc3lwcGRkcGZkd3N6anVqdmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwODEwMDQsImV4cCI6MjA3NTY1NzAwNH0.baTeknh36nwbn3PFV_CNGt-3aTD7QYo12mI1cxn6iZw";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const searchInput = document.getElementById("search");
 const filterType = document.getElementById("filter-type");
 const filterRarity = document.getElementById("filter-rarity");
@@ -8,13 +9,14 @@ const filterAttunement = document.getElementById("filter-attunement");
 const sortButton = document.getElementById("sort-alpha");
 const resultsBody = document.querySelector("#results tbody");
 
+let items = [];
+let filteredItems = [];
+let sortAscending = true;  // ✅ FIX: Declare this variable
+
 /* ---------- Load items from Supabase ---------- */
 async function loadItems() {
   try {
-    // Select all items. You can .order('name') here if you want server-side ordering.
-    const { data, error } = await supabaseClient
-      .from('items')
-      .select('*');
+    const { data, error } = await supabaseClient.from("items").select("*");
 
     if (error) {
       console.error("Supabase error:", error);
@@ -23,7 +25,6 @@ async function loadItems() {
     }
 
     items = Array.isArray(data) ? data : [];
-    // Optional: normalize attunement (so "Yes"/"No" casing is consistent)
     items = items.map(i => ({ ...i, attunement: (i.attunement || "").toString() }));
 
     populateFilters();
@@ -34,12 +35,10 @@ async function loadItems() {
   }
 }
 
-/* ---------- Populate filters (type & rarity) ---------- */
+/* ---------- Populate filters ---------- */
 function populateFilters() {
-  // Clear existing (except the first default option)
-  filterType.querySelectorAll('option:not(:first-child)').forEach(n => n.remove());
-  filterRarity.querySelectorAll('option:not(:first-child)').forEach(n => n.remove());
-  // We keep attunement fixed in HTML (Yes/No)
+  filterType.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
+  filterRarity.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
 
   const types = [...new Set(items.map(i => i.type || "").filter(Boolean))].sort();
   const rarities = [...new Set(items.map(i => i.rarity || "").filter(Boolean))].sort();
@@ -80,12 +79,12 @@ function renderItems(data) {
   });
 }
 
-/* ---------- Modal functions ---------- */
+/* ---------- Modal ---------- */
 const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modal-close");
 
 modalClose.addEventListener("click", closeModal);
-modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
 
 function openModal(item) {
   document.getElementById("modal-title").textContent = item.name || "";
@@ -117,7 +116,12 @@ function applyFilters() {
     return matchesSearch && matchesType && matchesRarity && matchesAttune;
   });
 
-  filteredItems.sort((a, b) => sortAscending ? (a.name || "").localeCompare(b.name || "") : (b.name || "").localeCompare(a.name || ""));
+  filteredItems.sort((a, b) =>
+    sortAscending
+      ? (a.name || "").localeCompare(b.name || "")
+      : (b.name || "").localeCompare(a.name || "")
+  );
+
   renderItems(filteredItems);
 }
 
@@ -136,6 +140,7 @@ searchInput.addEventListener("input", applyFilters);
 filterType.addEventListener("change", applyFilters);
 filterRarity.addEventListener("change", applyFilters);
 filterAttunement.addEventListener("change", applyFilters);
+
 sortButton.addEventListener("click", () => {
   sortAscending = !sortAscending;
   sortButton.textContent = sortAscending ? "Sort A–Z" : "Sort Z–A";
