@@ -1,15 +1,9 @@
-/* ===== Supabase Setup ===== */
+// ===== Supabase Connection =====
 const SUPABASE_URL = "https://mcsyppddpfdwszjujvdb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jc3lwcGRkcGZkd3N6anVqdmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwODEwMDQsImV4cCI6MjA3NTY1NzAwNH0.baTeknh36nwbn3PFV_CNGt-3aTD7QYo12mI1cxn6iZw";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jc3lwcGRkcGZkd3N6anVqdmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwODEwMDQsImV4cCI6MjA3NTY1NzAwNH0.baTeknh36nwbn3PFV_CNGt-3aTD7QYo12mI1cxn6iZw";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ===== Global Variables ===== */
-let items = [];
-let filteredItems = [];
-let sortAscending = true;
-let session = null;
-
-/* ===== DOM Elements ===== */
+// ===== DOM Elements =====
 const searchInput = document.getElementById("search");
 const filterType = document.getElementById("filter-type");
 const filterRarity = document.getElementById("filter-rarity");
@@ -17,63 +11,64 @@ const filterAttunement = document.getElementById("filter-attunement");
 const sortButton = document.getElementById("sort-alpha");
 const resultsBody = document.querySelector("#results tbody");
 
-const loginBtn = document.getElementById("login-btn");
-const logoutBtn = document.getElementById("logout-btn");
-const addItemBtn = document.getElementById("add-item-btn");
+const modal = document.getElementById("modal");
+const modalClose = document.getElementById("modal-close");
 
-/* ---------- Load Items ---------- */
+// Add Item Card Elements
+const addItemBtn = document.getElementById("add-item-btn");
+const addItemCard = document.getElementById("add-item-card");
+const cancelNewItemBtn = document.getElementById("cancel-new-item");
+const submitNewItemBtn = document.getElementById("submit-new-item");
+
+// ===== Global State =====
+let items = [];
+let filteredItems = [];
+let sortAscending = true;
+
+// ===== Fetch Items from Supabase =====
 async function loadItems() {
   try {
-    const { data, error } = await supabaseClient.from("items").select("*").order("name", { ascending: true });
+    const { data, error } = await supabaseClient.from("items").select("*");
     if (error) throw error;
-    items = data || [];
+
+    items = Array.isArray(data) ? data : [];
+    items = items.map(i => ({ ...i, attunement: (i.attunement || "").toString() }));
+
     populateFilters();
     applyFilters();
   } catch (err) {
-    console.error(err);
-    resultsBody.innerHTML = "<tr><td colspan='4'>Error loading items.</td></tr>";
+    console.error("Fetch failed:", err);
+    resultsBody.innerHTML = `<tr><td colspan="4">Network error.</td></tr>`;
   }
 }
 
-/* ---------- Populate Filters ---------- */
+// ===== Populate Filters =====
 function populateFilters() {
-  filterType.querySelectorAll("option:not(:first-child)").forEach(o => o.remove());
-  filterRarity.querySelectorAll("option:not(:first-child)").forEach(o => o.remove());
+  filterType.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
+  filterRarity.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
 
-  const types = [...new Set(items.map(i => i.type).filter(Boolean))].sort();
-  const rarities = [...new Set(items.map(i => i.rarity).filter(Boolean))].sort((a,b) => rarityOrder(a) - rarityOrder(b));
+  const types = [...new Set(items.map(i => i.type || "").filter(Boolean))].sort();
+  const rarities = [...new Set(items.map(i => i.rarity || "").filter(Boolean))].sort();
 
   types.forEach(t => {
     const opt = document.createElement("option");
-    opt.value = t; opt.textContent = t;
+    opt.value = t;
+    opt.textContent = t;
     filterType.appendChild(opt);
   });
 
   rarities.forEach(r => {
     const opt = document.createElement("option");
-    opt.value = r; opt.textContent = r;
+    opt.value = r;
+    opt.textContent = r;
     filterRarity.appendChild(opt);
   });
 }
 
-/* ---------- Rarity Sorting Helper ---------- */
-function rarityOrder(r) {
-  const order = {
-    "Common": 1,
-    "Uncommon": 2,
-    "Rare": 3,
-    "Very Rare": 4,
-    "Legendary": 5,
-    "Unique": 6,
-    "Artifact": 7
-  };
-  return order[r] || 99;
-}
-
-/* ---------- Render Table ---------- */
+// ===== Render Table =====
 function renderItems(data) {
   resultsBody.innerHTML = "";
-  if (!data.length) {
+  if (!data || data.length === 0) {
     resultsBody.innerHTML = "<tr><td colspan='4'>No items found.</td></tr>";
     return;
   }
@@ -81,144 +76,122 @@ function renderItems(data) {
   data.forEach(item => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${escapeHtml(item.name)}</td>
-      <td>${escapeHtml(item.type)}</td>
-      <td>${escapeHtml(item.rarity)}</td>
-      <td>${escapeHtml(item.attunement)}</td>
+      <td>${escapeHtml(item.name || "")}</td>
+      <td>${escapeHtml(item.type || "")}</td>
+      <td>${escapeHtml(item.rarity || "")}</td>
+      <td>${escapeHtml(item.attunement || "")}</td>
     `;
     tr.addEventListener("click", () => openModal(item));
     resultsBody.appendChild(tr);
   });
 }
 
-/* ---------- Filters ---------- */
-function applyFilters() {
-  const search = searchInput.value.toLowerCase();
-  const type = filterType.value;
-  const rarity = filterRarity.value;
-  const attune = filterAttunement.value;
-
-  filteredItems = items.filter(i =>
-    (!search || i.name.toLowerCase().includes(search)) &&
-    (!type || i.type === type) &&
-    (!rarity || i.rarity === rarity) &&
-    (!attune || i.attunement === attune)
-  );
-
-  filteredItems.sort((a, b) =>
-    sortAscending
-      ? a.name.localeCompare(b.name)
-      : b.name.localeCompare(a.name)
-  );
-
-  renderItems(filteredItems);
-}
-
-/* ---------- Modal Display ---------- */
-const modal = document.getElementById("modal");
-const modalClose = document.getElementById("modal-close");
+// ===== Modal Functions =====
+modalClose.addEventListener("click", closeModal);
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
 
 function openModal(item) {
-  document.getElementById("modal-title").textContent = item.name;
+  document.getElementById("modal-title").textContent = item.name || "";
   document.getElementById("modal-meta").innerHTML = `
-    <span><strong>Type:</strong> ${escapeHtml(item.type)}</span>
-    <span><strong>Rarity:</strong> ${escapeHtml(item.rarity)}</span>
-    <span><strong>Attunement:</strong> ${escapeHtml(item.attunement)}</span>
+    <span class="meta-item"><strong>Type:</strong> ${escapeHtml(item.type || "")}</span>
+    <span class="meta-item"><strong>Rarity:</strong> ${escapeHtml(item.rarity || "")}</span>
+    <span class="meta-item"><strong>Attunement:</strong> ${escapeHtml(item.attunement || "")}</span>
   `;
   document.getElementById("modal-description").innerHTML = marked.parse(item.description || "");
   modal.style.display = "flex";
 }
 
-modalClose.addEventListener("click", () => modal.style.display = "none");
-modal.addEventListener("click", e => { if (e.target === modal) modal.style.display = "none"; });
-
-/* ---------- Utility ---------- */
-function escapeHtml(str = "") {
-  return str.replace(/[&<>"']/g, m => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-  }[m]));
+function closeModal() {
+  modal.style.display = "none";
 }
 
-/* ---------- Sorting ---------- */
+// ===== Filter + Sort =====
+function applyFilters() {
+  const search = (searchInput.value || "").toLowerCase().trim();
+  const typeVal = filterType.value || "";
+  const rarityVal = filterRarity.value || "";
+  const attuneVal = filterAttunement.value || "";
+
+  filteredItems = items.filter(i => {
+    const matchesSearch = (i.name || "").toLowerCase().includes(search);
+    const matchesType = typeVal === "" || (i.type || "") === typeVal;
+    const matchesRarity = rarityVal === "" || (i.rarity || "") === rarityVal;
+    const matchesAttune = attuneVal === "" || (i.attunement || "") === attuneVal;
+    return matchesSearch && matchesType && matchesRarity && matchesAttune;
+  });
+
+  filteredItems.sort((a, b) =>
+    sortAscending
+      ? (a.name || "").localeCompare(b.name || "")
+      : (b.name || "").localeCompare(a.name || "")
+  );
+
+  renderItems(filteredItems);
+}
+
+// ===== Utility =====
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// ===== Event Listeners =====
+searchInput.addEventListener("input", applyFilters);
+filterType.addEventListener("change", applyFilters);
+filterRarity.addEventListener("change", applyFilters);
+filterAttunement.addEventListener("change", applyFilters);
 sortButton.addEventListener("click", () => {
   sortAscending = !sortAscending;
   sortButton.textContent = sortAscending ? "Sort A–Z" : "Sort Z–A";
   applyFilters();
 });
 
-/* ---------- Search and Filters ---------- */
-searchInput.addEventListener("input", applyFilters);
-filterType.addEventListener("change", applyFilters);
-filterRarity.addEventListener("change", applyFilters);
-filterAttunement.addEventListener("change", applyFilters);
-
-/* ---------- Auth Modals ---------- */
-const loginModal = document.getElementById("login-modal");
-const loginSubmit = document.getElementById("login-submit");
-const loginCancel = document.getElementById("login-cancel");
-
-loginBtn.addEventListener("click", () => loginModal.classList.remove("hidden"));
-loginCancel.addEventListener("click", () => loginModal.classList.add("hidden"));
-
-loginSubmit.addEventListener("click", async () => {
-  const email = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value.trim();
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error) return alert("Login failed: " + error.message);
-
-  session = data.session;
-  loginModal.classList.add("hidden");
-  updateAuthUI();
+// ===== Add Item Card Logic =====
+addItemBtn.addEventListener("click", () => {
+  addItemCard.style.display = "flex";
 });
 
-/* ---------- Logout ---------- */
-logoutBtn.addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
-  session = null;
-  updateAuthUI();
+cancelNewItemBtn.addEventListener("click", () => {
+  addItemCard.style.display = "none";
 });
 
-/* ---------- Add Item Modal ---------- */
-const addItemModal = document.getElementById("add-item-modal");
-const itemSubmit = document.getElementById("item-submit");
-const itemCancel = document.getElementById("item-cancel");
-
-addItemBtn.addEventListener("click", () => addItemModal.classList.remove("hidden"));
-itemCancel.addEventListener("click", () => addItemModal.classList.add("hidden"));
-
-itemSubmit.addEventListener("click", async () => {
-  const name = document.getElementById("item-name").value.trim();
-  const type = document.getElementById("item-type").value.trim();
-  const rarity = document.getElementById("item-rarity").value;
-  const attunement = document.getElementById("item-attunement").value;
-  const description = document.getElementById("item-description").value.trim();
-
-  if (!name || !type || !rarity || !attunement)
-    return alert("Please fill all required fields.");
-
-  const { error } = await supabaseClient.from("items").insert([{ name, type, rarity, attunement, description }]);
-  if (error) return alert("Failed to add item: " + error.message);
-
-  alert("Item added!");
-  addItemModal.classList.add("hidden");
-  loadItems();
+addItemCard.addEventListener("click", e => {
+  if (e.target === addItemCard) addItemCard.style.display = "none";
 });
 
-/* ---------- Session Handling ---------- */
-async function checkSession() {
-  const { data } = await supabaseClient.auth.getSession();
-  session = data.session;
-  updateAuthUI();
-}
+submitNewItemBtn.addEventListener("click", async () => {
+  const newItem = {
+    name: document.getElementById("new-name").value,
+    type: document.getElementById("new-type").value,
+    rarity: document.getElementById("new-rarity").value,
+    attunement: document.getElementById("new-attunement").value,
+    description: document.getElementById("new-description").value
+  };
 
-function updateAuthUI() {
-  const loggedIn = !!session;
-  addItemBtn.classList.toggle("hidden", !loggedIn);
-  logoutBtn.classList.toggle("hidden", !loggedIn);
-  loginBtn.classList.toggle("hidden", loggedIn);
-}
+  if (!newItem.name || !newItem.type || !newItem.rarity) {
+    return alert("Name, Type, and Rarity are required.");
+  }
 
-/* ---------- Init ---------- */
-checkSession();
+  const { error } = await supabaseClient.from("items").insert([newItem]);
+  if (error) {
+    console.error("Error adding item:", error);
+    return alert("Failed to add item.");
+  }
+
+  // Reset form
+  document.getElementById("new-name").value = "";
+  document.getElementById("new-type").value = "";
+  document.getElementById("new-rarity").value = "";
+  document.getElementById("new-attunement").value = "";
+  document.getElementById("new-description").value = "";
+
+  addItemCard.style.display = "none";
+  loadItems(); // Refresh table
+});
+
+// ===== Initialize =====
 loadItems();

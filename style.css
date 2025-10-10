@@ -8,6 +8,7 @@ body {
   color: #e0e0e0;
 }
 
+/* ===== Header ===== */
 header {
   background: #000000;
   color: #ffffff;
@@ -22,6 +23,7 @@ h1 {
   font-size: 2rem;
 }
 
+/* ===== Controls ===== */
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -64,6 +66,7 @@ h1 {
   background: #666666;
 }
 
+/* ===== Main Table ===== */
 main {
   padding: 2rem 1rem;
   overflow-x: auto;
@@ -94,7 +97,7 @@ td {
   border-bottom: 1px solid #444444;
 }
 
-/* Modal overlay */
+/* ===== Modal ===== */
 #modal {
   display: none;
   position: fixed;
@@ -146,54 +149,80 @@ td {
   color: #cccccc;
 }
 
-/* ----- Modal Form Styles ----- */
-.modal-form {
+/* ===== Add Item Card ===== */
+#add-item-card {
   display: none;
   position: fixed;
-  inset: 0;
+  z-index: 1001;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.7);
   justify-content: center;
   align-items: center;
-  z-index: 1000;
 }
 
-.modal-form-box {
-  background: #2b2b2b;
+#add-item-card .card-content {
+  background: #3a3a3a;
   padding: 2rem;
   border-radius: 12px;
-  max-width: 400px;
   width: 90%;
+  max-width: 500px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
   color: #e0e0e0;
 }
 
-.modal-form-box input,
-.modal-form-box select,
-.modal-form-box textarea,
-.modal-form-box button {
-  background: #3a3a3a;
-  border: 1px solid #555;
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  color: #fff;
+#add-item-card h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+#add-item-card input,
+#add-item-card select,
+#add-item-card textarea {
+  padding: 0.5rem;
   font-size: 1rem;
-}
-
-.modal-form-box input::placeholder,
-.modal-form-box textarea::placeholder {
-  color: #aaa;
-}
-
-.modal-form-box button {
-  cursor: pointer;
-  background: #4caf50;
+  border-radius: 6px;
   border: none;
-  font-weight: 600;
-  transition: background 0.2s;
+  outline: none;
+  background: #444444;
+  color: #e0e0e0;
+  width: 100%;
+  resize: vertical;
 }
 
-.modal-form-box button:hover {
-  background: #45a049;
+#add-item-card textarea {
+  min-height: 100px;
+}
+
+#add-item-card .card-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+#add-item-card button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+#add-item-card button:hover {
+  filter: brightness(1.2);
+}
+
+#add-item-card .submit-btn {
+  background-color: #28a745;
+  color: #fff;
+}
+
+#add-item-card .cancel-btn {
+  background-color: #555555;
+  color: #fff;
 }
