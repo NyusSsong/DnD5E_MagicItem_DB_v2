@@ -93,7 +93,7 @@ function openModal(item) {
     <span class="meta-item"><strong>Rarity:</strong> ${escapeHtml(item.rarity || "")}</span>
     <span class="meta-item"><strong>Attunement:</strong> ${escapeHtml(item.attunement || "")}</span>
   `;
-  document.getElementById("modal-description").textContent = item.description || "";
+  document.getElementById("modal-description").innerHTML = marked.parse(item.description || "");
   modal.style.display = "flex";
 }
 
