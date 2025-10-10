@@ -1,6 +1,6 @@
 // ===== Supabase Connection =====
-const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co"; // Replace with your Supabase URL
-const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY"; // Replace with your anon key
+const SUPABASE_URL = "https://mcsyppddpfdwszjujvdb.supabase.co"; 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jc3lwcGRkcGZkd3N6anVqdmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwODEwMDQsImV4cCI6MjA3NTY1NzAwNH0.baTeknh36nwbn3PFV_CNGt-3aTD7QYo12mI1cxn6iZw"; 
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===== Global State =====
