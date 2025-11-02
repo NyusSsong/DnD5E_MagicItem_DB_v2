@@ -62,7 +62,7 @@ function populateFilters() {
   });
 
   // Rarities fixed
-  const rarities = ["Common","Uncommon","Rare","Very Rare","Legendary","Unique"];
+  const rarities = ["Common","Uncommon","Rare","Very Rare","Legendary","Artifact","Unique"];
   filterRarity.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
   rarities.forEach(r => {
     const opt = document.createElement("option");
