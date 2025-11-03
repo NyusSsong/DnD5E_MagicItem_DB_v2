@@ -53,7 +53,7 @@ async function loadItems() {
 function populateFilters() {
   // Types dynamic
   filterType.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
-  const types = [...new Set(items.map(i => i.type || "").filter(Boolean))].sort();
+  const types = [...new Set(items.map(i => (i.type || "").replace(/\s*\(.*\)/, "")).filter(Boolean))].sort();
   types.forEach(t => {
     const opt = document.createElement("option");
     opt.value = t;
