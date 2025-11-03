@@ -115,8 +115,10 @@ function applyFilters(){
   const attuneVal = filterAttunement.value || "";
 
   filteredItems = items.filter(i => {
-    const matchesSearch = (i.name||"").toLowerCase().includes(search);
-    const matchesType = typeVal === "" || (i.type||"")===typeVal;
+    const matchesSearch = search === "" || 
+      (i.name || "").toLowerCase().includes(search) ||
+      (i.type || "").toLowerCase().includes(search);
+    const matchesType = typeVal === "" || (i.type || "").toLowerCase().includes(typeVal.toLowerCase());
     const matchesRarity = rarityVal === "" || (i.rarity||"")===rarityVal;
     const matchesAttune = attuneVal === "" || (i.attunement||"")===attuneVal;
     return matchesSearch && matchesType && matchesRarity && matchesAttune;
