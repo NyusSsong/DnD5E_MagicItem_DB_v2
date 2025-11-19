@@ -76,7 +76,7 @@ function populateFilters() {
 function renderItems(data) {
   resultsBody.innerHTML = "";
   if (!data || data.length === 0) {
-    resultsBody.innerHTML = "<tr><td colspan='4'>No items found.</td></tr>";
+    resultsBody.innerHTML = "<tr><td colspan='5'>No items found.</td></tr>";
     return;
   }
   data.forEach(item => {
@@ -86,8 +86,23 @@ function renderItems(data) {
       <td>${escapeHtml(item.type || "")}</td>
       <td>${escapeHtml(item.rarity || "")}</td>
       <td>${escapeHtml(item.attunement || "")}</td>
+      <td class="actions-cell">
+        ${user ? `<button class="edit-btn" data-id="${item.id}">✏️ Edit</button>` : ''}
+      </td>
     `;
-    tr.addEventListener("click", () => openModal(item));
+    
+    // Click row to view details
+    tr.querySelector('td:not(.actions-cell)')?.addEventListener("click", () => openModal(item));
+    
+    // Edit button
+    const editBtn = tr.querySelector('.edit-btn');
+    if (editBtn) {
+      editBtn.addEventListener("click", (e) => {
+        e.stopPropagation(); // Prevent opening modal
+        openEditCard(item);
+      });
+    }
+    
     resultsBody.appendChild(tr);
   });
 }
@@ -169,6 +184,7 @@ loginSubmit.addEventListener("click", async ()=>{
     loginBtn.style.display = "none";
     logoutBtn.style.display = "inline-block";
     openAddCardBtn.style.display = "inline-block";
+    applyFilters(); // Refresh table to show edit buttons
   } catch(err) {
     console.error(err);
     loginError.textContent = "Login failed. Check your credentials.";
@@ -181,6 +197,7 @@ logoutBtn.addEventListener("click", async ()=>{
   loginBtn.style.display="inline-block";
   logoutBtn.style.display="none";
   openAddCardBtn.style.display="none";
+  applyFilters(); // Refresh table to hide edit buttons
 });
 
 // ===== Add Item Card =====
@@ -216,6 +233,89 @@ submitItemBtn.addEventListener("click", async ()=>{
   } catch(err){
     console.error("Failed to add item:", err);
     alert("Failed to add item.");
+  }
+});
+
+// ===== DOM Elements for Edit =====
+const editItemCard = document.getElementById("edit-item-card");
+const cancelEditBtn = document.getElementById("cancel-edit");
+const updateItemBtn = document.getElementById("update-item");
+const deleteItemBtn = document.getElementById("delete-item");
+
+// ===== Edit Item Card =====
+function openEditCard(item) {
+  document.getElementById("edit-id").value = item.id;
+  document.getElementById("edit-name").value = item.name || "";
+  document.getElementById("edit-type").value = item.type || "";
+  document.getElementById("edit-rarity").value = item.rarity || "";
+  document.getElementById("edit-attunement").value = item.attunement || "";
+  document.getElementById("edit-description").value = item.description || "";
+  editItemCard.style.display = "flex";
+}
+
+cancelEditBtn.addEventListener("click", () => editItemCard.style.display = "none");
+editItemCard.addEventListener("click", e => { 
+  if(e.target === editItemCard) editItemCard.style.display = "none"; 
+});
+
+// ===== Update Item =====
+updateItemBtn.addEventListener("click", async () => {
+  if(!user) return alert("You must be logged in to edit items.");
+
+  const itemId = document.getElementById("edit-id").value;
+  const updatedItem = {
+    name: document.getElementById("edit-name").value.trim(),
+    type: document.getElementById("edit-type").value.trim(),
+    rarity: document.getElementById("edit-rarity").value,
+    attunement: document.getElementById("edit-attunement").value,
+    description: document.getElementById("edit-description").value.trim()
+  };
+
+  if(!updatedItem.name || !updatedItem.type || !updatedItem.rarity || !updatedItem.attunement){
+    return alert("Please fill all required fields.");
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from("items")
+      .update(updatedItem)
+      .eq('id', itemId);
+    
+    if(error) throw error;
+    
+    editItemCard.style.display = "none";
+    alert("Item updated successfully!");
+    loadItems();
+  } catch(err) {
+    console.error("Failed to update item:", err);
+    alert("Failed to update item.");
+  }
+});
+
+// ===== Delete Item =====
+deleteItemBtn.addEventListener("click", async () => {
+  if(!user) return alert("You must be logged in to delete items.");
+  
+  if(!confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
+    return;
+  }
+
+  const itemId = document.getElementById("edit-id").value;
+
+  try {
+    const { error } = await supabaseClient
+      .from("items")
+      .delete()
+      .eq('id', itemId);
+    
+    if(error) throw error;
+    
+    editItemCard.style.display = "none";
+    alert("Item deleted successfully!");
+    loadItems();
+  } catch(err) {
+    console.error("Failed to delete item:", err);
+    alert("Failed to delete item.");
   }
 });
 

@@ -298,3 +298,42 @@ td {
   color: #fff;
 }
 
+/* Actions cell */
+.actions-cell {
+  width: 100px;
+  text-align: center;
+}
+
+.edit-btn {
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 0.4em 0.8em;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+.edit-btn:hover {
+  background: #1976d2;
+}
+
+.delete-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 0.75em 1.5em;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.delete-btn:hover {
+  background: #d32f2f;
+}
+
+/* Prevent row click on actions cell */
+tr:hover .actions-cell {
+  cursor: default;
+}
+
