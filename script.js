@@ -14,11 +14,6 @@ const resultsBody = document.querySelector("#results tbody");
 const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modal-close");
 
-const addItemCard = document.getElementById("add-item-card");
-const openAddCardBtn = document.getElementById("open-add-card");
-const cancelAddBtn = document.getElementById("cancel-item");
-const submitItemBtn = document.getElementById("submit-item");
-
 const loginModal = document.getElementById("login-modal");
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout-btn");
@@ -27,6 +22,21 @@ const loginCancel = document.getElementById("login-cancel");
 const loginEmail = document.getElementById("login-email");
 const loginPassword = document.getElementById("login-password");
 const loginError = document.getElementById("login-error");
+
+const openFormCardBtn = document.getElementById("open-add-card");
+
+// Unified Add/Edit Modal
+const formModal = document.getElementById("form-item-modal");
+const formTitle = document.getElementById("form-modal-title");
+const formId = document.getElementById("form-item-id");
+const formName = document.getElementById("form-name");
+const formType = document.getElementById("form-type");
+const formRarity = document.getElementById("form-rarity");
+const formAttunement = document.getElementById("form-attunement");
+const formDescription = document.getElementById("form-description");
+const formSubmitBtn = document.getElementById("form-submit-btn");
+const formDeleteBtn = document.getElementById("form-delete-btn");
+const formCancelBtn = document.getElementById("form-cancel-btn");
 
 // ===== Global State =====
 let items = [];
@@ -45,13 +55,13 @@ async function loadItems() {
     applyFilters();
   } catch (err) {
     console.error("Fetch failed:", err);
-    resultsBody.innerHTML = "<tr><td colspan='4'>Network error.</td></tr>";
+    resultsBody.innerHTML = "<tr><td colspan='5'>Network error.</td></tr>";
   }
 }
 
-// ===== Populate Type + Rarity + Attunement Filters =====
+// ===== Populate Filters =====
 function populateFilters() {
-  // Types dynamic
+  // Type filter
   filterType.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
   const types = [...new Set(items.map(i => (i.type || "").replace(/\s*\(.*\)/, "")).filter(Boolean))].sort();
   types.forEach(t => {
@@ -61,7 +71,7 @@ function populateFilters() {
     filterType.appendChild(opt);
   });
 
-  // Rarities fixed
+  // Rarity filter
   const rarities = ["Common","Uncommon","Rare","Very Rare","Legendary","Artifact","Unique"];
   filterRarity.querySelectorAll("option:not(:first-child)").forEach(n => n.remove());
   rarities.forEach(r => {
@@ -79,6 +89,7 @@ function renderItems(data) {
     resultsBody.innerHTML = "<tr><td colspan='5'>No items found.</td></tr>";
     return;
   }
+
   data.forEach(item => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -90,26 +101,28 @@ function renderItems(data) {
         ${user ? `<button class="edit-btn" data-id="${item.id}">✏️ Edit</button>` : ''}
       </td>
     `;
-    
-    // Click row to view details
-    tr.querySelector('td:not(.actions-cell)')?.addEventListener("click", () => openModal(item));
-    
+
+    // Row click → show details
+    tr.querySelectorAll("td:not(.actions-cell)").forEach(td => {
+      td.addEventListener("click", () => openModal(item));
+    });
+
     // Edit button
-    const editBtn = tr.querySelector('.edit-btn');
-    if (editBtn) {
-      editBtn.addEventListener("click", (e) => {
-        e.stopPropagation(); // Prevent opening modal
-        openEditCard(item);
+    const editBtn = tr.querySelector(".edit-btn");
+    if(editBtn) {
+      editBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        openFormModal(item);
       });
     }
-    
+
     resultsBody.appendChild(tr);
   });
 }
 
-// ===== Modal =====
+// ===== Modal Details =====
 modalClose.addEventListener("click", () => modal.style.display = "none");
-modal.addEventListener("click", e => { if(e.target===modal) modal.style.display="none"; });
+modal.addEventListener("click", e => { if(e.target === modal) modal.style.display = "none"; });
 
 function openModal(item){
   document.getElementById("modal-title").textContent = item.name || "";
@@ -122,7 +135,7 @@ function openModal(item){
   modal.style.display = "flex";
 }
 
-// ===== Filters + Sort =====
+// ===== Filters & Sorting =====
 function applyFilters(){
   const search = (searchInput.value || "").toLowerCase().trim();
   const typeVal = filterType.value || "";
@@ -139,7 +152,7 @@ function applyFilters(){
     return matchesSearch && matchesType && matchesRarity && matchesAttune;
   });
 
-  filteredItems.sort((a,b)=>
+  filteredItems.sort((a,b) =>
     sortAscending
       ? (a.name||"").localeCompare(b.name||"")
       : (b.name||"").localeCompare(a.name||"")
@@ -162,18 +175,19 @@ searchInput.addEventListener("input", applyFilters);
 filterType.addEventListener("change", applyFilters);
 filterRarity.addEventListener("change", applyFilters);
 filterAttunement.addEventListener("change", applyFilters);
-sortButton.addEventListener("click", ()=>{
-  sortAscending=!sortAscending;
-  sortButton.textContent=sortAscending?"Sort A–Z":"Sort Z–A";
+
+sortButton.addEventListener("click", () => {
+  sortAscending = !sortAscending;
+  sortButton.textContent = sortAscending ? "Sort A–Z" : "Sort Z–A";
   applyFilters();
 });
 
 // ===== Login / Logout =====
-loginBtn.addEventListener("click", ()=> loginModal.style.display="flex");
-loginCancel.addEventListener("click", ()=> loginModal.style.display="none");
+loginBtn.addEventListener("click", () => loginModal.style.display = "flex");
+loginCancel.addEventListener("click", () => loginModal.style.display = "none");
 loginModal.addEventListener("click", e => { if(e.target===loginModal) loginModal.style.display="none"; });
 
-loginSubmit.addEventListener("click", async ()=>{
+loginSubmit.addEventListener("click", async () => {
   loginError.textContent = "";
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -185,138 +199,114 @@ loginSubmit.addEventListener("click", async ()=>{
     loginModal.style.display = "none";
     loginBtn.style.display = "none";
     logoutBtn.style.display = "inline-block";
-    openAddCardBtn.style.display = "inline-block";
-    applyFilters(); // Refresh table to show edit buttons
-  } catch(err) {
+    openFormCardBtn.style.display = "inline-block";
+    applyFilters();
+  } catch(err){
     console.error(err);
     loginError.textContent = "Login failed. Check your credentials.";
   }
 });
 
-logoutBtn.addEventListener("click", async ()=>{
+logoutBtn.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
-  user=null;
-  loginBtn.style.display="inline-block";
-  logoutBtn.style.display="none";
-  openAddCardBtn.style.display="none";
-  applyFilters(); // Refresh table to hide edit buttons
+  user = null;
+  loginBtn.style.display = "inline-block";
+  logoutBtn.style.display = "none";
+  openFormCardBtn.style.display = "none";
+  applyFilters();
 });
 
-// ===== Add Item Card =====
-openAddCardBtn.addEventListener("click", ()=>addItemCard.style.display="flex");
-cancelAddBtn.addEventListener("click", ()=>addItemCard.style.display="none");
-addItemCard.addEventListener("click", e=>{ if(e.target===addItemCard) addItemCard.style.display="none"; });
+// ===== Open Add Item Modal =====
+openFormCardBtn.addEventListener("click", () => openFormModal());
 
-submitItemBtn.addEventListener("click", async ()=>{
-  if(!user) return alert("You must be logged in to add items.");
-
-  const newItem = {
-    name: document.getElementById("add-name").value.trim(),
-    type: document.getElementById("add-type").value.trim(),
-    rarity: document.getElementById("add-rarity").value,
-    attunement: document.getElementById("add-attunement").value,
-    description: document.getElementById("add-description").value.trim()
-  };
-  if(!newItem.name || !newItem.type || !newItem.rarity || !newItem.attunement){
-    return alert("Please fill all required fields.");
+// ===== Unified Add/Edit Modal =====
+function openFormModal(item = null) {
+  if(item){
+    // Editing
+    formTitle.textContent = "Edit Item";
+    formId.value = item.id;
+    formName.value = item.name || "";
+    formType.value = item.type || "";
+    formRarity.value = item.rarity || "";
+    formAttunement.value = item.attunement || "";
+    formDescription.value = item.description || "";
+    formDeleteBtn.style.display = "inline-block";
+  } else {
+    // Adding
+    formTitle.textContent = "Add Item";
+    formId.value = "";
+    formName.value = "";
+    formType.value = "";
+    formRarity.value = "";
+    formAttunement.value = "";
+    formDescription.value = "";
+    formDeleteBtn.style.display = "none";
   }
-
-  try {
-    const { error } = await supabaseClient.from("items").insert([newItem]);
-    if(error) throw error;
-    // Reset form
-    document.getElementById("add-name").value="";
-    document.getElementById("add-type").value="";
-    document.getElementById("add-rarity").value="";
-    document.getElementById("add-attunement").value="";
-    document.getElementById("add-description").value="";
-    addItemCard.style.display="none";
-    loadItems();
-  } catch(err){
-    console.error("Failed to add item:", err);
-    alert("Failed to add item.");
-  }
-});
-
-// ===== DOM Elements for Edit =====
-const editItemCard = document.getElementById("edit-item-card");
-const cancelEditBtn = document.getElementById("cancel-edit");
-const updateItemBtn = document.getElementById("update-item");
-const deleteItemBtn = document.getElementById("delete-item");
-
-// ===== Edit Item Card =====
-function openEditCard(item) {
-  document.getElementById("edit-id").value = item.id;
-  document.getElementById("edit-name").value = item.name || "";
-  document.getElementById("edit-type").value = item.type || "";
-  document.getElementById("edit-rarity").value = item.rarity || "";
-  document.getElementById("edit-attunement").value = item.attunement || "";
-  document.getElementById("edit-description").value = item.description || "";
-  editItemCard.style.display = "flex";
+  formModal.style.display = "flex";
 }
 
-cancelEditBtn.addEventListener("click", () => editItemCard.style.display = "none");
-editItemCard.addEventListener("click", e => { 
-  if(e.target === editItemCard) editItemCard.style.display = "none"; 
-});
+function closeFormModal(){ formModal.style.display = "none"; }
 
-// ===== Update Item =====
-updateItemBtn.addEventListener("click", async () => {
-  if(!user) return alert("You must be logged in to edit items.");
+formCancelBtn.addEventListener("click", closeFormModal);
+formModal.addEventListener("click", e => { if(e.target===formModal) closeFormModal(); });
 
-  const itemId = document.getElementById("edit-id").value;
-  const updatedItem = {
-    name: document.getElementById("edit-name").value.trim(),
-    type: document.getElementById("edit-type").value.trim(),
-    rarity: document.getElementById("edit-rarity").value,
-    attunement: document.getElementById("edit-attunement").value,
-    description: document.getElementById("edit-description").value.trim()
+// ===== Submit (Add / Update) =====
+formSubmitBtn.addEventListener("click", async () => {
+  if(!user) return alert("You must be logged in.");
+
+  const itemData = {
+    name: formName.value.trim(),
+    type: formType.value.trim(),
+    rarity: formRarity.value,
+    attunement: formAttunement.value,
+    description: formDescription.value.trim()
   };
 
-  if(!updatedItem.name || !updatedItem.type || !updatedItem.rarity || !updatedItem.attunement){
+  if(!itemData.name || !itemData.type || !itemData.rarity || !itemData.attunement){
     return alert("Please fill all required fields.");
   }
 
-  try {
-    const { error } = await supabaseClient
-      .from("items")
-      .update(updatedItem)
-      .eq('id', itemId);
-    
-    if(error) throw error;
-    
-    editItemCard.style.display = "none";
-    alert("Item updated successfully!");
+  try{
+    if(formId.value){
+      // Update
+      const { error } = await supabaseClient
+        .from("items")
+        .update(itemData)
+        .eq("id", formId.value);
+      if(error) throw error;
+      alert("Item updated!");
+    } else {
+      // Add
+      const { error } = await supabaseClient
+        .from("items")
+        .insert([itemData]);
+      if(error) throw error;
+      alert("Item added!");
+    }
+    closeFormModal();
     loadItems();
-  } catch(err) {
-    console.error("Failed to update item:", err);
-    alert("Failed to update item.");
+  } catch(err){
+    console.error(err);
+    alert("Operation failed.");
   }
 });
 
-// ===== Delete Item =====
-deleteItemBtn.addEventListener("click", async () => {
-  if(!user) return alert("You must be logged in to delete items.");
-  
-  if(!confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
-    return;
-  }
+// ===== Delete =====
+formDeleteBtn.addEventListener("click", async () => {
+  if(!user) return alert("You must be logged in.");
+  if(!confirm("Are you sure you want to delete this item?")) return;
 
-  const itemId = document.getElementById("edit-id").value;
-
-  try {
+  try{
     const { error } = await supabaseClient
       .from("items")
       .delete()
-      .eq('id', itemId);
-    
+      .eq("id", formId.value);
     if(error) throw error;
-    
-    editItemCard.style.display = "none";
-    alert("Item deleted successfully!");
+    alert("Item deleted!");
+    closeFormModal();
     loadItems();
-  } catch(err) {
-    console.error("Failed to delete item:", err);
+  } catch(err){
+    console.error(err);
     alert("Failed to delete item.");
   }
 });

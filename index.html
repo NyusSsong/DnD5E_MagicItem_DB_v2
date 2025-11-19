@@ -58,13 +58,14 @@
   </div>
 </div>
 
-<!-- Add Item Card -->
-<div id="add-item-card">
+<!-- Unified Add/Edit Item Modal -->
+<div id="form-item-modal">
   <div class="card-content">
-    <h2>Add New Item</h2>
-    <input type="text" id="add-name" placeholder="Name" required />
-    <input type="text" id="add-type" placeholder="Type" required />
-    <select id="add-rarity" required>
+    <h2 id="form-modal-title">Add/Edit Item</h2>
+    <input type="hidden" id="form-item-id" />
+    <input type="text" id="form-name" placeholder="Name" required />
+    <input type="text" id="form-type" placeholder="Type" required />
+    <select id="form-rarity" required>
       <option value="">Select Rarity</option>
       <option value="Common">Common</option>
       <option value="Uncommon">Uncommon</option>
@@ -74,46 +75,16 @@
       <option value="Artifact">Artifact</option>
       <option value="Unique">Unique</option>
     </select>
-    <select id="add-attunement" required>
+    <select id="form-attunement" required>
       <option value="">Requires Attunement?</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
     </select>
-    <textarea id="add-description" placeholder="Description (supports * for bullet points)"></textarea>
+    <textarea id="form-description" placeholder="Description (supports * for bullet points)"></textarea>
     <div class="card-buttons">
-      <button class="submit-btn" id="submit-item">Add Item</button>
-      <button class="cancel-btn" id="cancel-item">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Item Card -->
-<div id="edit-item-card">
-  <div class="card-content">
-    <h2>Edit Item</h2>
-    <input type="hidden" id="edit-id" />
-    <input type="text" id="edit-name" placeholder="Name" required />
-    <input type="text" id="edit-type" placeholder="Type" required />
-    <select id="edit-rarity" required>
-      <option value="">Select Rarity</option>
-      <option value="Common">Common</option>
-      <option value="Uncommon">Uncommon</option>
-      <option value="Rare">Rare</option>
-      <option value="Very Rare">Very Rare</option>
-      <option value="Legendary">Legendary</option>
-      <option value="Artifact">Artifact</option>
-      <option value="Unique">Unique</option>
-    </select>
-    <select id="edit-attunement" required>
-      <option value="">Requires Attunement?</option>
-      <option value="Yes">Yes</option>
-      <option value="No">No</option>
-    </select>
-    <textarea id="edit-description" placeholder="Description (supports * for bullet points)"></textarea>
-    <div class="card-buttons">
-      <button class="submit-btn" id="update-item">Update Item</button>
-      <button class="delete-btn" id="delete-item">Delete Item</button>
-      <button class="cancel-btn" id="cancel-edit">Cancel</button>
+      <button class="submit-btn" id="form-submit-btn">Save</button>
+      <button class="delete-btn" id="form-delete-btn" style="display:none;">Delete</button>
+      <button class="cancel-btn" id="form-cancel-btn">Cancel</button>
     </div>
   </div>
 </div>

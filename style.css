@@ -97,7 +97,7 @@ td {
   border-bottom: 1px solid #444444;
 }
 
-/* ===== Modal ===== */
+/* ===== Item Details Modal ===== */
 #modal {
   display: none;
   position: fixed;
@@ -149,40 +149,40 @@ td {
   color: #cccccc;
 }
 
-/* ===== Add Item Card ===== */
-#add-item-card {
+/* ===== Unified Add/Edit Item Modal ===== */
+#form-item-modal {
   display: none;
   position: fixed;
   z-index: 1001;
   top: 0; left: 0;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0,0,0,0.7);
   justify-content: center;
   align-items: center;
 }
 
-#add-item-card .card-content {
+#form-item-modal .card-content {
   background: #3a3a3a;
   padding: 2rem;
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
+  max-height: 90%;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 8px 20px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   color: #e0e0e0;
+  resize: none;
 }
 
-#add-item-card h2 {
-  margin-top: 0;
-  font-size: 1.5rem;
-  text-align: center;
-}
-
-#add-item-card input,
-#add-item-card select,
-#add-item-card textarea {
+/* Inputs, selects, textareas */
+#form-item-modal input,
+#form-item-modal select,
+#form-item-modal textarea {
   padding: 0.5rem;
   font-size: 1rem;
   border-radius: 6px;
@@ -191,20 +191,21 @@ td {
   background: #444444;
   color: #e0e0e0;
   width: 100%;
-  resize: vertical;
+  resize: vertical;  /* Only textareas resize vertically */
 }
 
-#add-item-card textarea {
+#form-item-modal textarea {
   min-height: 100px;
 }
 
-#add-item-card .card-buttons {
+/* Buttons */
+#form-item-modal .card-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
 }
 
-#add-item-card button {
+#form-item-modal button {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: none;
@@ -213,17 +214,22 @@ td {
   transition: all 0.2s;
 }
 
-#add-item-card button:hover {
+#form-item-modal button:hover {
   filter: brightness(1.2);
 }
 
-#add-item-card .submit-btn {
+#form-item-modal .submit-btn {
   background-color: #28a745;
   color: #fff;
 }
 
-#add-item-card .cancel-btn {
+#form-item-modal .cancel-btn {
   background-color: #555555;
+  color: #fff;
+}
+
+#form-item-modal .delete-btn {
+  background-color: #f44336;
   color: #fff;
 }
 
@@ -336,66 +342,3 @@ td {
 tr:hover .actions-cell {
   cursor: default;
 }
-
-/* ===== Edit Item Card ===== */
-#edit-item-card {
-  display: none;
-  position: fixed;
-  z-index: 1001;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.7);
-  justify-content: center;
-  align-items: center;
-}
-
-#edit-item-card .card-content {
-  background: #3a3a3a;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  color: #e0e0e0;
-}
-
-#edit-item-card input,
-#edit-item-card select,
-#edit-item-card textarea {
-  padding: 0.5rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: none;
-  outline: none;
-  background: #444444;
-  color: #e0e0e0;
-  width: 100%;
-  resize: vertical;
-}
-
-#edit-item-card textarea {
-  min-height: 100px;
-}
-
-#edit-item-card .card-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-#edit-item-card button {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-#edit-item-card button:hover {
-  filter: brightness(1.2);
-}
-
