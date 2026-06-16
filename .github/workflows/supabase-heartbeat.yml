@@ -1,0 +1,32 @@
+name: Supabase Heartbeat
+ 
+on:
+  schedule:
+    # Corre cada 5 días a las 9:00 AM UTC (lunes, sábado, jueves, martes, domingo...)
+    # cron no soporta "cada N días" nativamente, así que usamos días fijos:
+    # 1, 6, 11, 16, 21, 26 de cada mes a las 09:00 UTC
+    - cron: "0 9 1,6,11,16,21,26 * *"
+  workflow_dispatch: # Permite lanzarlo manualmente desde la UI de GitHub
+ 
+jobs:
+  ping-supabase:
+    name: Ping Supabase DB
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Query Supabase REST API
+        run: |
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+            -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/items?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+ 
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response: $(cat response.json)"
+ 
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "❌ Ping fallido — HTTP $HTTP_STATUS"
+            exit 1
+          fi
+ 
+          echo "✅ Ping exitoso — Supabase sigue activo"
